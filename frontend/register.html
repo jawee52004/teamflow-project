@@ -33,7 +33,12 @@
       });
 
       const result = await response.json();
-      document.getElementById("message").textContent = result.message || result.error;
+      if (result.message) {
+      alert("Registration successful! Redirecting to login...");
+      window.location.href = "login.html";  // ✅ redirect to login page
+      } else {
+        document.getElementById("message").textContent = result.error;
+      }
     });
   </script>
 </body>
