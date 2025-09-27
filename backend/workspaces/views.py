@@ -81,6 +81,8 @@ def project_list(request, workspace_id):
         if serializer.is_valid():
             serializer.save(workspace=workspace)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Log serializer errors for debugging
+        print('Project creation errors:', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
