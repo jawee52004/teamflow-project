@@ -2,45 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - TeamFlow</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Register</h2>
-  <form id="registerForm">
-    <label>Email:</label>
-    <input type="email" id="email" required><br><br>
-    <label>Password:</label>
-    <input type="password" id="password" required><br><br>
+  <!-- Logo and Tagline Section -->
+  <div class="container-logo">
+    <header>
+      <img src="images/teamflow-logo.png" alt="TeamFlow Logo" class="logo-image">
+      <h1 class="logo">TeamFlow</h1>
+      <p class="tagline">Streamline your team's workflow</p>
+    </header>
+  </div>
+  
+  <!-- Navigation Buttons Section -->
+  <div class="nav-background">
+    <div class="container-nav">
+    <nav class="auth-links">
+      <a href="login.html" class="login-link">Login</a>
+      <a href="#" class="signup-link">Sign Up</a>
+    </nav>
+  </div>
 
-    <button type="submit">Register</button>
-    <p>Already have an account? <a href="login.html">Log In</a></p>
-  </form>
+   </div>
+  
+  <!-- Separator -->
+  <hr class="separator">
 
-  <p id="message"></p>
+  <!-- Form Section -->
+  <div class="container-form">
+    <section class="login-section">
+      <h2>Create account</h2>
+      <p class="subtitle">Join TeamFlow and start managing your projects</p>
+      
+      <form id="registerForm" class="login-form">
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input type="text" id="fname" placeholder="Enter First Name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input type="text" id="lname" placeholder="Enter Last Name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Create a password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" placeholder="Re-enter password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Create Account</button>
+      </form>
+
+      <div id="message"></div>
+    </section>
+  </div>
 
   <!-- Load Supabase library first -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Replace with your actual Supabase project URL and anon key
-    const SUPABASE_URL = 'https://emwyjdkjbrepvqsdzzfx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd3lqZGtqYnJlcHZxc2R6emZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzQwODEsImV4cCI6MjA3NDM1MDA4MX0.xqmZxYzIoiA1ZMthFCJnh5NsIB-9AmtxzmIs5mg-sVs';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script>
+      // Replace with your actual Supabase project URL and anon key
+      const SUPABASE_URL = 'https://emwyjdkjbrepvqsdzzfx.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd3lqZGtqYnJlcHZxc2R6emZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzQwODEsImV4cCI6MjA3NDM1MDA4MX0.xqmZxYzIoiA1ZMthFCJnh5NsIB-9AmtxzmIs5mg-sVs';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    document.getElementById("registerForm").addEventListener("submit", async function(event) {
-      event.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      document.getElementById("registerForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
 
-      // Supabase registration
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        document.getElementById("message").textContent = error.message;
-      } else {
-        alert("Registration successful! Please check your email to confirm your account.");
-        window.location.href = "login.html";
-      }
-    });
-  </script>
+        const fname = document.getElementById("fname").value;
+        const lname = document.getElementById("lname").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm_password").value;
+
+        // Check confirm password
+        if (password !== confirmPassword) {
+          document.getElementById("message").textContent = "Passwords do not match.";
+          return;
+        }
+
+        // Supabase registration with metadata
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { fname, lname }  // this goes to user_metadata
+          }
+        });
+
+        if (error) {
+          document.getElementById("message").textContent = error.message;
+        } else {
+          alert("Registration successful! Please check your email to confirm your account.");
+          window.location.href = "login.html";
+        }
+      });
+    </script>
 </body>
 </html>

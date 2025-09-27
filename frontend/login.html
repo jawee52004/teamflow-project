@@ -2,23 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - TeamFlow</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Login</h2>
-  <form id="loginForm">
-    <label>Email:</label>
-    <input type="email" id="email" required><br><br>
 
-    <label>Password:</label>
-    <input type="password" id="password" required><br><br>
+  <!-- Logo and Tagline Section -->
+  <div class="container-logo">
+    <header>
+      <img src="images/teamflow-logo.png" alt="TeamFlow Logo" class="logo-image">
+      <h1 class="logo">TeamFlow</h1>
+      <p class="tagline">Streamline your team's workflow</p>
+    </header>
+  </div>
 
-    <button type="submit">Login</button>
-    <p>Don't have an account? <a href="register.html">Register</a></p>
-  </form>
+  <!-- Navigation Buttons Section -->
+  <div class="nav-background">
+    <div class="container-nav">
+      <nav class="auth-links">
+        <a href="#" class="login-link">Login</a>
+        <a href="register.html" class="signup-link">Sign Up</a>
+      </nav>
+    </div>
+  </div>
+  
+  <!-- Separator -->
+  <hr class="separator">
 
-  <p id="message"></p>
+  <!-- Form Section -->
+  <div class="container-form">
+    <section class="login-section">
+      <h2>Welcome back!</h2>
+      <p class="subtitle">Please enter your details</p>
+      
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+
+      <div id="message"></div>
+    </section>
+  </div>
 
   <!-- Load Supabase library first -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
