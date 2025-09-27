@@ -108,7 +108,7 @@
                 <div class="workspace-card">
                     <h4>${workspace.name}</h4>
                     <p>${workspace.description || 'No description'}</p>
-                    <p><strong>Owner:</strong> ${workspace.owner_username}</p>
+                    <p><strong>Owner:</strong> ${workspace.owner_email}</p>
                     <p><strong>Members:</strong> ${workspace.member_count}</p>
                     <p><strong>Created:</strong> ${new Date(workspace.created_at).toLocaleDateString()}</p>
                     
@@ -207,7 +207,7 @@
                 openModal('Workspace Details', `
                     <h4>${workspace.name}</h4>
                     <p><strong>Description:</strong> ${workspace.description || 'No description'}</p>
-                    <p><strong>Owner:</strong> ${workspace.owner_username}</p>
+                    <p><strong>Owner:</strong> ${workspace.owner_email}</p>
                     <p><strong>Members:</strong> ${workspace.member_count}</p>
                     <p><strong>Created:</strong> ${new Date(workspace.created_at).toLocaleDateString()}</p>
                     <p><strong>Last Updated:</strong> ${new Date(workspace.updated_at).toLocaleDateString()}</p>
