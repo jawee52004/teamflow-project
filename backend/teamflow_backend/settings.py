@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'users',
+    'workspaces',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -92,6 +94,33 @@ DATABASES = {
         ssl_require=True                 # enforce SSL for Supabase
     )
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'workspaces.authentication.SupabaseJWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # Keep for admin
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Update ALLOWED_HOSTS for Supabase and local development
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'emwyjdkjbrepvqsdzzfx.supabase.co',
+    '.supabase.co',
+]
+
+# CORS settings for Supabase
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://emwyjdkjbrepvqsdzzfx.supabase.co",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Password validation
