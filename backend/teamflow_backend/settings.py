@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'teamflow_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
+DATABASES = {   
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',  # fallback if .env is missing
         conn_max_age=600,                # persistent connections
