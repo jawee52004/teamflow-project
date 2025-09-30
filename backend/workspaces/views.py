@@ -28,6 +28,8 @@ def test_auth(request):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def workspace_list(request):
+    
+
     if request.method == 'GET':
         workspaces = Workspace.objects.filter(members=request.user)
         serializer = WorkspaceSerializer(workspaces, many=True)
@@ -39,6 +41,8 @@ def workspace_list(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -46,6 +50,9 @@ def workspace_list(request):
 def workspace_detail(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk, members=request.user)
 
+    
+
+    
     if request.method == 'GET':
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data)
@@ -66,6 +73,9 @@ def workspace_detail(request, pk):
 
         workspace.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+
 
 
 # ----------------- PROJECTS -----------------
@@ -73,6 +83,8 @@ def workspace_detail(request, pk):
 @permission_classes([IsAuthenticated])
 def project_list(request, workspace_id):
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
+
+    
 
     if request.method == 'GET':
         projects = workspace.projects.all()
@@ -91,8 +103,11 @@ def project_list(request, workspace_id):
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def project_detail(request, workspace_id, pk):
+
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
     project = get_object_or_404(workspace.projects, pk=pk)
+
+    
 
     if request.method == 'GET':
         serializer = ProjectSerializer(project)
@@ -122,6 +137,8 @@ def project_detail(request, workspace_id, pk):
 def workspace_members(request, workspace_id):
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
 
+    
+
     if request.method == 'GET':
         members = WorkspaceMember.objects.filter(workspace=workspace)
         serializer = WorkspaceMemberSerializer(members, many=True)
@@ -144,8 +161,9 @@ def workspace_members(request, workspace_id):
 def task_list(request, workspace_id):
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
 
+    
+
     if request.method == 'GET':
-        # tasks = Task.objects.filter(workspace=workspace)
         tasks = Task.objects.filter(project__workspace=workspace)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
@@ -162,9 +180,7 @@ def task_list(request, workspace_id):
 @permission_classes([IsAuthenticated])
 def task_detail(request, workspace_id, pk):
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
-    # task = get_object_or_404(Task, pk=pk, workspace=workspace)
     task = get_object_or_404(Task, pk=pk, project__workspace=workspace)
-
 
     if request.method == 'GET':
         serializer = TaskSerializer(task)
