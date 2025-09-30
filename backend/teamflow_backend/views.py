@@ -1,4 +1,18 @@
-from django.http import HttpResponse
+# from django.http import HttpResponse
+
+# def home(request):
+#     return HttpResponse("Welcome to TeamFlow Backend API 🚀")
+
+from django.shortcuts import render
 
 def home(request):
-    return HttpResponse("Welcome to TeamFlow Backend API 🚀")
+    return render(request, "landing.html")
+
+def login_page(request):
+    return render(request, "login.html")
+
+def register_page(request):
+    return render(request, "register.html")
+
+def workspace_page(request):
+    return render(request, "workspace.html")
