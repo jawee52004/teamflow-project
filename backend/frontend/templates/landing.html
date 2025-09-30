@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamFlow Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
     <div class="container">
@@ -43,7 +44,7 @@
         async function makeAuthenticatedRequest(url, options = {}) {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                window.location.href = 'login.html';
+                window.location.href = '/login/';
                 return null;
             }
             const defaultOptions = {
@@ -71,7 +72,7 @@
                         <p><strong>Owner:</strong> ${ws.owner_email}</p>
                         <p><strong>Members:</strong> ${ws.member_count}</p>
                         <p><strong>Created:</strong> ${new Date(ws.created_at).toLocaleDateString()}</p>
-                        <button onclick="window.location.href='workspace.html?id=${ws.id}'" class="btn-primary">
+                        <button onclick="window.location.href='/workspace/?id=${ws.id}'" class="btn-primary">
                             View Details
                         </button>
                     </div>

@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Login - TeamFlow</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
   <h2>Login</h2>
@@ -42,7 +43,7 @@
         // Save token so workspace.html can use it
         localStorage.setItem("authToken", data.session.access_token);
         console.log("Saved token:", data.session.access_token);
-        window.location.href = "landing.html"; // Redirect to landing page
+        window.location.href = "/landing/"; // Redirect to landing page
       }
     });
   </script>
