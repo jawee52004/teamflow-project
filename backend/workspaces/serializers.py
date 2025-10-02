@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workspace, Project, WorkspaceMember, Task
+from .models import Workspace, Project, WorkspaceMember, Task, WorkspaceInvitation
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -10,6 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email']
 
+# ---- Adding members to workspace ----
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(
@@ -45,6 +46,29 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
         validated_data["workspace"] = workspace
         return super().create(validated_data)
 
+# ---- Email confirmation in adding members to workspace ----
+# class WorkspaceInvitationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = WorkspaceInvitation
+#         fields = ['id', 'email', 'workspace', 'invited_by', 'role', 'token', 'accepted', 'created_at']
+#         read_only_fields = ['id', 'token', 'accepted', 'created_at', 'invited_by', 'workspace']
+
+#     def create(self, validated_data):
+#         validated_data['invited_by'] = self.context['request'].user
+#         validated_data['workspace'] = self.context['workspace']
+#         return super().create(validated_data)
+class WorkspaceInvitationSerializer(serializers.ModelSerializer):
+    invited_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = WorkspaceInvitation
+        fields = ["id", "email", "role", "invited_by", "token", "accepted", "created_at"]
+        read_only_fields = ["id", "token", "accepted", "created_at", "invited_by"]
+
+    def create(self, validated_data):
+        validated_data["invited_by"] = self.context["request"].user
+        validated_data["workspace"] = self.context["workspace"]
+        return super().create(validated_data)
 
 
 # ---- Task ----
