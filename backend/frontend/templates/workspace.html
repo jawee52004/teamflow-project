@@ -50,6 +50,7 @@
     }
 
     async function loadWorkspaceDetails() {
+      // Fetch workspace info including tasks
       const res = await makeAuthenticatedRequest(
         `http://127.0.0.1:8080/api/workspaces/${workspaceId}/`
       );
@@ -61,11 +62,13 @@
 
       const ws = await res.json();
 
+      // Populate workspace details
       document.getElementById("workspaceName").textContent = ws.name;
       document.getElementById("workspaceDesc").textContent = ws.description;
-      document.getElementById("workspaceOwner").textContent = ws.owner?.email || "Unknown";
+      document.getElementById("workspaceOwner").textContent = ws.owner_email || "Unknown";
       document.getElementById("workspaceCreated").textContent = new Date(ws.created_at).toLocaleString();
 
+      // Populate members
       const membersList = document.getElementById("membersList");
       membersList.innerHTML = "";
       (ws.members || []).forEach(m => {
@@ -74,6 +77,7 @@
         membersList.appendChild(li);
       });
 
+      // Populate tasks (directly from serializer)
       const tasksList = document.getElementById("tasksList");
       tasksList.innerHTML = "";
       (ws.tasks || []).forEach(t => {
@@ -107,10 +111,12 @@
         return;
       }
 
+      // After adding a task, just reload workspace details to refresh list
       document.getElementById("taskForm").reset();
       loadWorkspaceDetails();
     });
 
+    // Initial load
     loadWorkspaceDetails();
   </script>
 </body>
