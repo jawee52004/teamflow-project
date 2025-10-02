@@ -36,88 +36,154 @@
       </select>
       <button type="submit">Add Task</button>
     </form>
+
+    <h4>Add Member</h4>
+    <form id="memberForm">
+      <input type="email" id="memberEmail" placeholder="User Email" required>
+      <select id="memberRole">
+        <option value="developer">Developer</option>
+        <option value="viewer">Viewer</option>
+      </select>
+      <button type="submit">Add Member</button>
+    </form>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const workspaceId = params.get("id");
-    const token = localStorage.getItem("authToken");
+  const params = new URLSearchParams(window.location.search);
+  const workspaceId = params.get("id");
+  const token = localStorage.getItem("authToken");
 
-    async function makeAuthenticatedRequest(url, options = {}) {
-      if (!options.headers) options.headers = {};
-      options.headers["Authorization"] = "Bearer " + token;
-      return fetch(url, options);
+  async function makeAuthenticatedRequest(url, options = {}) {
+    if (!options.headers) options.headers = {};
+    options.headers["Authorization"] = "Bearer " + token;
+    return fetch(url, options);
+  }
+
+  async function loadWorkspaceDetails() {
+    // Fetch workspace info including tasks and members
+    const res = await makeAuthenticatedRequest(
+      `http://127.0.0.1:8080/api/workspaces/${workspaceId}/`
+    );
+
+    if (!res.ok) {
+      console.error("Failed to load workspace:", res.status);
+      return;
     }
 
-    async function loadWorkspaceDetails() {
-      // Fetch workspace info including tasks
-      const res = await makeAuthenticatedRequest(
-        `http://127.0.0.1:8080/api/workspaces/${workspaceId}/`
-      );
+    const ws = await res.json();
 
-      if (!res.ok) {
-        console.error("Failed to load workspace:", res.status);
-        return;
-      }
+    // Populate workspace details
+    document.getElementById("workspaceName").textContent = ws.name;
+    document.getElementById("workspaceDesc").textContent = ws.description;
+    document.getElementById("workspaceOwner").textContent =
+      ws.owner_email || "Unknown";
+    document.getElementById("workspaceCreated").textContent = new Date(
+      ws.created_at
+    ).toLocaleString();
 
-      const ws = await res.json();
-
-      // Populate workspace details
-      document.getElementById("workspaceName").textContent = ws.name;
-      document.getElementById("workspaceDesc").textContent = ws.description;
-      document.getElementById("workspaceOwner").textContent = ws.owner_email || "Unknown";
-      document.getElementById("workspaceCreated").textContent = new Date(ws.created_at).toLocaleString();
-
-      // Populate members
-      const membersList = document.getElementById("membersList");
-      membersList.innerHTML = "";
-      (ws.members || []).forEach(m => {
-        const li = document.createElement("li");
-        li.textContent = `${m.user?.email || "Unknown"} (${m.role})`;
-        membersList.appendChild(li);
-      });
-
-      // Populate tasks (directly from serializer)
-      const tasksList = document.getElementById("tasksList");
-      tasksList.innerHTML = "";
-      (ws.tasks || []).forEach(t => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <strong>${t.title}</strong>
-          <span class="task-status status-${t.status}">${t.status}</span><br>
-          ${t.description || ""}
-        `;
-        tasksList.appendChild(li);
-      });
-    }
-
-    document.getElementById("taskForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const title = document.getElementById("taskTitle").value;
-      const description = document.getElementById("taskDesc").value;
-      const status = document.getElementById("taskStatus").value;
-
-      const res = await makeAuthenticatedRequest(
-        `http://127.0.0.1:8080/api/workspaces/${workspaceId}/tasks/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description, status })
-        }
-      );
-
-      if (!res.ok) {
-        alert("Failed to add task. Error: " + res.status);
-        return;
-      }
-
-      // After adding a task, just reload workspace details to refresh list
-      document.getElementById("taskForm").reset();
-      loadWorkspaceDetails();
+    // Populate members
+    const membersList = document.getElementById("membersList");
+    membersList.innerHTML = "";
+    (ws.members || []).forEach((m) => {
+      const li = document.createElement("li");
+      li.textContent = `${m.user?.email || "Unknown"} (${m.role})`;
+      membersList.appendChild(li);
     });
 
-    // Initial load
+    // Populate tasks
+    const tasksList = document.getElementById("tasksList");
+    tasksList.innerHTML = "";
+    (ws.tasks || []).forEach((t) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${t.title}</strong>
+        <span class="task-status status-${t.status}">${t.status}</span><br>
+        ${t.description || ""}
+      `;
+      tasksList.appendChild(li);
+    });
+  }
+
+  // Add new task
+  document.getElementById("taskForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("taskTitle").value;
+    const description = document.getElementById("taskDesc").value;
+    const status = document.getElementById("taskStatus").value;
+
+    const res = await makeAuthenticatedRequest(
+      `http://127.0.0.1:8080/api/workspaces/${workspaceId}/tasks/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description, status }),
+      }
+    );
+
+    if (!res.ok) {
+      alert("Failed to add task. Error: " + res.status);
+      return;
+    }
+
+    document.getElementById("taskForm").reset();
     loadWorkspaceDetails();
-  </script>
+  });
+
+  // // Add new member
+  // document.getElementById("memberForm").addEventListener("submit", async (e) => {
+  //   e.preventDefault();
+  //   const user_email = document.getElementById("memberEmail").value.trim();
+  //   const role = document.getElementById("memberRole").value;
+
+  //   const res = await makeAuthenticatedRequest(
+  //     `http://127.0.0.1:8080/api/workspaces/${workspaceId}/members/`,
+  //     {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ user_email: user_email, role: role }),
+  //     }
+  //   );
+
+  //   if (!res.ok) {
+  //     const err = await res.json().catch(() => ({}));
+  //     console.error("Failed to add member:", res.status, err);
+  //     alert("Failed to add member. " + JSON.stringify(err));
+  //     return;
+  //   }
+
+  //   document.getElementById("memberForm").reset();
+  //   loadWorkspaceDetails();
+  // });
+  // Add new member
+  document.getElementById("memberForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const user_email = document.getElementById("memberEmail").value.trim();
+    const role = document.getElementById("memberRole").value;
+
+    const res = await makeAuthenticatedRequest(
+      `http://127.0.0.1:8080/api/workspaces/${workspaceId}/members/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_email: user_email, role: role, workspace: workspaceId }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Failed to add member:", res.status, err);
+      alert("Failed to add member. " + JSON.stringify(err));
+      return;
+    }
+
+    document.getElementById("memberForm").reset();
+    loadWorkspaceDetails();
+  });
+
+
+  // Initial load
+  loadWorkspaceDetails();
+</script>
+
 </body>
 </html>

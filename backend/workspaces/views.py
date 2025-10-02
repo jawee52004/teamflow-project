@@ -50,9 +50,6 @@ def workspace_list(request):
 def workspace_detail(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk, members=request.user)
 
-    
-
-    
     if request.method == 'GET':
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data)
@@ -74,10 +71,6 @@ def workspace_detail(request, pk):
         workspace.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-    
-
-
-
 # ----------------- PROJECTS -----------------
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -137,8 +130,6 @@ def project_detail(request, workspace_id, pk):
 def workspace_members(request, workspace_id):
     workspace = get_object_or_404(Workspace, pk=workspace_id, members=request.user)
 
-    
-
     if request.method == 'GET':
         members = WorkspaceMember.objects.filter(workspace=workspace)
         serializer = WorkspaceMemberSerializer(members, many=True)
@@ -148,12 +139,12 @@ def workspace_members(request, workspace_id):
         if workspace.owner != request.user:
             return Response({"error": "Only the owner can add members"}, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = WorkspaceMemberSerializer(data=request.data)
+        serializer = WorkspaceMemberSerializer(data=request.data, context={"workspace": workspace})
         if serializer.is_valid():
+            # serializer.save()
             serializer.save(workspace=workspace)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # ----------------- TASKS -----------------
 @api_view(['GET', 'POST'])
