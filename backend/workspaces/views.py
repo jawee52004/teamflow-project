@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from .models import Workspace, Project, WorkspaceMember, WorkspaceInvitation, Task
 from django.contrib.auth import get_user_model
+from .utils import is_supabase_user
 from .serializers import (
     WorkspaceSerializer,
     ProjectSerializer,
@@ -193,6 +194,10 @@ def invite_member(request, workspace_id):
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # ✅ Check if user exists in Supabase
+    if not is_supabase_user(email):
+        return Response({"error": "This email is not registered in Supabase Auth"}, status=status.HTTP_400_BAD_REQUEST)
+
     # Create the invitation
     invitation = WorkspaceInvitation.objects.create(
         workspace=workspace,
@@ -201,10 +206,8 @@ def invite_member(request, workspace_id):
         invited_by=request.user,
     )
 
-    # Generate invitation link correctly from the named route
-    invite_link = request.build_absolute_uri(
-        reverse("accept-invite", args=[invitation.token])
-    )
+    # Generate invitation link
+    invite_link = f"http://127.0.0.1:8080/api/invitations/{invitation.token}/accept/"
 
     # Build email
     subject = f"You're invited to join {workspace.name} on TeamFlow"
@@ -223,12 +226,13 @@ def invite_member(request, workspace_id):
         subject,
         message,
         to=[email],
-        from_email="TeamFlow <no-reply@teamflow.com>",  # your app identity
-        headers={"Reply-To": request.user.email},       # direct replies go to the owner
+        from_email="TeamFlow <no-reply@teamflow.com>",
+        headers={"Reply-To": request.user.email},
     )
     email_msg.send()
 
     return Response({"message": "Invitation sent successfully"})
+
 
 # ----------------- ACCEPT INVITE ----------------- 
 @api_view(['GET'])

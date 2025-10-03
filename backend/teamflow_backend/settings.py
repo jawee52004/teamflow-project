@@ -84,6 +84,9 @@ DATABASES = {
     )
 }
 
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'workspaces.authentication.SupabaseJWTAuthentication',
