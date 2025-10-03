@@ -46,17 +46,6 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
         validated_data["workspace"] = workspace
         return super().create(validated_data)
 
-# ---- Email confirmation in adding members to workspace ----
-# class WorkspaceInvitationSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = WorkspaceInvitation
-#         fields = ['id', 'email', 'workspace', 'invited_by', 'role', 'token', 'accepted', 'created_at']
-#         read_only_fields = ['id', 'token', 'accepted', 'created_at', 'invited_by', 'workspace']
-
-#     def create(self, validated_data):
-#         validated_data['invited_by'] = self.context['request'].user
-#         validated_data['workspace'] = self.context['workspace']
-#         return super().create(validated_data)
 class WorkspaceInvitationSerializer(serializers.ModelSerializer):
     invited_by = UserSerializer(read_only=True)
 
