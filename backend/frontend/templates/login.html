@@ -1,5 +1,5 @@
 {% load static %}
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -48,5 +48,88 @@
     });
   </script>
 </body>
-</html> 
+</html>  -->
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - TeamFlow</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+  <!-- Logo and Tagline Section -->
+  <div class="container-logo">
+    <header>
+      <img src= "{% static 'images/tf_logo.png' %}" alt="TeamFlow Logo" class="logo-image">
+      <h1 class="logo">TeamFlow</h1>
+      <p class="tagline">Streamline your team's workflow</p>
+    </header>
+  </div>
+
+  <!-- Navigation Buttons Section -->
+  <div class="nav-background">
+    <div class="container-nav">
+      <nav class="auth-links">
+        <a href="#" class="login-link">Login</a>
+        <a href="/register/" class="signup-link">Sign Up</a>
+      </nav>
+    </div>
+  </div>
+  
+  <!-- Separator -->
+  <hr class="separator">
+
+  <!-- Form Section -->
+  <div class="container-form">
+    <section class="login-section">
+      <h2>Welcome back!</h2>
+      <p class="subtitle">Please enter your details</p>
+      
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+
+      <div id="message"></div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Replace with your actual Supabase project URL and anon key
+    const SUPABASE_URL = 'https://emwyjdkjbrepvqsdzzfx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd3lqZGtqYnJlcHZxc2R6emZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzQwODEsImV4cCI6MjA3NDM1MDA4MX0.xqmZxYzIoiA1ZMthFCJnh5NsIB-9AmtxzmIs5mg-sVs';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      // Supabase login
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        console.error("Login failed:", error.message);
+        alert("Login failed: " + error.message);       
+      } else {
+        // Save token so workspace.html can use it
+        localStorage.setItem("authToken", data.session.access_token);
+        console.log("Saved token:", data.session.access_token);
+        window.location.href = "/landing/"; // Redirect to landing page
+      }
+    });
+  </script>
+</body>
+</html>   

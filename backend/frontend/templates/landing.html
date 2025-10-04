@@ -1,11 +1,11 @@
-{% load static %}
+<!-- {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamFlow Dashboard</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="container">
@@ -14,7 +14,7 @@
             <button id="logoutBtn" class="btn-danger">Logout</button>
         </header>
 
-        <!-- Workspace Creation Form -->
+        <!-- Workspace Creation Form 
         <div class="form-container">
             <h3>Create New Workspace</h3>
             <form id="createWorkspaceForm">
@@ -24,7 +24,7 @@
             </form>
         </div>
 
-        <!-- User's Workspaces -->
+        <!-- User's Workspaces
         <div class="workspace-section">
             <h2>Your Workspaces</h2>
             <div id="workspacesList" class="loading">
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <!-- Supabase client -->
+    <!-- Supabase client 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://emwyjdkjbrepvqsdzzfx.supabase.co';
@@ -108,4 +108,199 @@
     </script>
 </body>
 </html>
+ -->
 
+{% load static %}
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamFlow</title>
+    <link rel="stylesheet" href= "{% static 'css/landing.css' %}">
+</head>
+<body>
+    <!-- nav bar -->
+    <div>
+        <nav class="nav-background">
+            <div class="nav-container">
+                <!-- Left side - Logo -->
+                <div class="logo-section">
+                    <img src="{% static 'images/tf_logo.png' %}" alt="TeamFlow Logo" class="nav-logo">
+                    <span class="nav-title">TeamFlow</span>
+                </div>
+                
+                <!-- Right side - Both buttons grouped -->
+                <div class="nav-right-section">
+                    <button id="logoutBtn" class="btn-danger">Logout</button>
+                    <div class="profile-section">
+                        <img src="{% static 'images/profile-pic.png' %}" alt="Profile Picture" class="profile-pic">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="header">
+        <div class="welcome-text">
+            <h1 class="welcome-message">Welcome back <span class="profile-name"></span>!</h1>
+            <p class="subtitle">Manage your workspaces and stay on top of your projects</p>
+        </div>
+        <button id="add_workspace" class="add_workspace">New Workspace</button>
+    </div>
+
+    <div class="workspace-section">
+        <!-- <h2 style="color:black;">Your Workspaces</h2> -->
+        <div id="workspacesList" class="loading">
+            Loading your workspaces...
+        </div>
+    </div>
+
+
+    <!-- Modal Structure -->
+    <div id="workspaceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Workspace</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createWorkspaceForm">
+                    <div class="form-group">
+                        <label for="workspaceName">Workspace Name</label>
+                        <input type="text" id="workspaceName" placeholder="Enter workspace name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workspaceDescription">Description (optional)</label>
+                        <textarea id="workspaceDescription" placeholder="Enter workspace description"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary cancel-modal">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Workspace</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://emwyjdkjbrepvqsdzzfx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd3lqZGtqYnJlcHZxc2R6emZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzQwODEsImV4cCI6MjA3NDM1MDA4MX0.xqmZxYzIoiA1ZMthFCJnh5NsIB-9AmtxzmIs5mg-sVs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const API_BASE_URL = 'http://127.0.0.1:8080/api';
+
+        async function makeAuthenticatedRequest(url, options = {}) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '/login/';
+                return null;
+            }
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+            return await response.json();
+        }
+
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = '/login/';
+        };
+
+        async function getUserProfile() {
+            const { data: { user } } = await supabase.auth.getUser()
+            
+            if (user) {
+                const fname = user.user_metadata.fname
+                const lname = user.user_metadata.lname
+                const fullName = `${fname} ${lname}`
+                
+                document.querySelector('.profile-name').textContent = fullName
+                document.querySelector('.welcome-message').textContent = `Welcome back, ${fname}!`
+                
+                return { fname, lname }
+            }
+            return null
+        }
+
+        // Modal functionality
+        const workspaceModal = document.getElementById('workspaceModal');
+        const createWorkspaceForm = document.getElementById('createWorkspaceForm');
+
+        document.querySelector('.add_workspace').addEventListener('click', function() {
+            workspaceModal.classList.add('active');
+        });
+
+        function closeModal() {
+            workspaceModal.classList.remove('active');
+            createWorkspaceForm.reset();
+        }
+
+        document.querySelectorAll('.close-modal, .cancel-modal').forEach(button => {
+            button.addEventListener('click', closeModal);
+        });
+
+        workspaceModal.addEventListener('click', function(e) {
+            if (e.target === workspaceModal) {
+                closeModal();
+            }
+        });
+
+        //load workspaces
+        async function loadWorkspaces() {
+            try {
+                const workspaces = await makeAuthenticatedRequest(`${API_BASE_URL}/workspaces/`);
+                const container = document.getElementById('workspacesList');
+                if (!workspaces || workspaces.length === 0) {
+                    container.innerHTML = '<p>No workspaces yet. Create one above!</p>';
+                    return;
+                }
+                container.innerHTML = workspaces.map(ws => `
+                    <div class="workspace-card">
+                        <h4>${ws.name}</h4>
+                        <p id="owner"><strong>Owner:</strong> ${ws.owner_email}</p>
+                        <p id="member"><strong>Members:</strong> ${ws.member_count}</p>
+                        <p id="date"><strong>Created:</strong> ${new Date(ws.created_at).toLocaleDateString()}</p>
+                        <button onclick="window.location.href='/workspace/?id=${ws.id}'" class="btn-viewworkspace">
+                            Open Workspace
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('workspacesList').innerHTML = '<p>Error loading workspaces.</p>';
+            }
+        }
+
+        createWorkspaceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('workspaceName').value;
+            const description = document.getElementById('workspaceDescription').value;
+            
+            try {
+                await makeAuthenticatedRequest(`${API_BASE_URL}/workspaces/`, {
+                    method: 'POST',
+                    body: JSON.stringify({ name, description })
+                });
+                loadWorkspaces();
+                closeModal(); 
+                e.target.reset();
+
+            } catch (err) {
+                alert('Error creating workspace: ' + err.message);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserProfile();  
+            loadWorkspaces();  
+        });
+    </script>
+</body>
+</html>
