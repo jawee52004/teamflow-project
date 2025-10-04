@@ -1,18 +1,26 @@
 from django.shortcuts import get_object_or_404
+from django.core.mail import EmailMessage
+from django.shortcuts import render
+from django.conf import settings
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from .models import WorkspaceInvitation
 from .serializers import WorkspaceInvitationSerializer
 from django.core.mail import send_mail
-from .models import Workspace, Project, WorkspaceMember, Task
+from django.urls import reverse
+from .models import Workspace, Project, WorkspaceMember, WorkspaceInvitation, Task
+from django.contrib.auth import get_user_model
+from .utils import is_supabase_user
 from .serializers import (
     WorkspaceSerializer,
     ProjectSerializer,
     WorkspaceMemberSerializer,
     TaskSerializer
 )
+
+User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -180,39 +188,102 @@ def invite_member(request, workspace_id):
     if workspace.owner != request.user:
         return Response({"error": "Only the owner can invite members"}, status=status.HTTP_403_FORBIDDEN)
 
-    serializer = WorkspaceInvitationSerializer(data=request.data, context={"request": request, "workspace": workspace})
-    if serializer.is_valid():
-        invitation = serializer.save()
-        return Response(WorkspaceInvitationSerializer(invitation).data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    email = request.data.get("email")
+    role = request.data.get("role", "developer")
 
+    if not email:
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def accept_invitation(request, token):
-    try:
-        invitation = WorkspaceInvitation.objects.get(token=token, accepted=False)
-    except WorkspaceInvitation.DoesNotExist:
-        return Response({"error": "Invalid or expired invitation"}, status=status.HTTP_400_BAD_REQUEST)
+    # ✅ Check if user exists in Supabase
+    if not is_supabase_user(email):
+        return Response({"error": "This email is not registered in Supabase Auth"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Find registered user by email
-    try:
-        user = User.objects.get(email=invitation.email)
-    except User.DoesNotExist:
-        return Response({"error": "No registered account with this email"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Add user to workspace
-    WorkspaceMember.objects.create(
-        workspace=invitation.workspace,
-        user=user,
-        role=invitation.role
+    # Create the invitation
+    invitation = WorkspaceInvitation.objects.create(
+        workspace=workspace,
+        email=email,
+        role=role,
+        invited_by=request.user,
     )
 
-    invitation.accepted = True
-    invitation.save()
+    # Generate invitation link
+    invite_link = f"http://127.0.0.1:8080/api/invitations/{invitation.token}/accept/"
 
-    return Response({"message": f"Welcome to {invitation.workspace.name}!"})
+    # Build email
+    subject = f"You're invited to join {workspace.name} on TeamFlow"
+    message = f"""
+    Hi,
+
+    {request.user.username} ({request.user.email}) has invited you to join the workspace "{workspace.name}" as a {role}.
+
+    Click the link below to accept the invitation:
+    {invite_link}
+
+    - TeamFlow
+    """
+
+    email_msg = EmailMessage(
+        subject,
+        message,
+        to=[email],
+        from_email="TeamFlow <no-reply@teamflow.com>",
+        headers={"Reply-To": request.user.email},
+    )
+    email_msg.send()
+
+    return Response({"message": "Invitation sent successfully"})
 
 
+# ----------------- ACCEPT INVITE ----------------- 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def accept_invite(request, token):
+    try:
+        invitation = WorkspaceInvitation.objects.get(token=token)
+    except WorkspaceInvitation.DoesNotExist:
+        return render(request, "invitation_success.html", {
+            "workspace_name": "TeamFlow",
+            "role": "N/A",
+            "error": "Invalid invitation link."
+        })
+
+    # Check if already accepted
+    if invitation.accepted:
+        return render(request, "invitation_success.html", {
+            "workspace_name": invitation.workspace.name,
+            "role": invitation.role,
+            "error": "This invitation has already been accepted."
+        })
+
+    # Optional: check expiration (e.g., 7 days old)
+    if (now() - invitation.created_at).days > 7:
+        return render(request, "invitation_success.html", {
+            "workspace_name": invitation.workspace.name,
+            "role": invitation.role,
+            "error": "This invitation has expired. Please request a new one."
+        })
+
+    # Try to attach user
+    try:
+        user = User.objects.get(email=invitation.email)
+        WorkspaceMember.objects.create(
+            workspace=invitation.workspace,
+            user=user,
+            role=invitation.role,
+        )
+        invitation.accepted = True
+        invitation.save()
+        return render(request, "invitation_success.html", {
+            "workspace_name": invitation.workspace.name,
+            "role": invitation.role,
+        })
+    except User.DoesNotExist:
+        return render(request, "invitation_success.html", {
+            "workspace_name": invitation.workspace.name,
+            "role": invitation.role,
+            "error": "No registered user with this email. Please sign up first."
+        })
+        
 # ----------------- TASKS -----------------
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])

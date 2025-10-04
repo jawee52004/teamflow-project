@@ -170,7 +170,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.btn-viewworkspace:hover, .add_workspace:hover, .btn-danger:hover {
+.btn-viewworkspace:hover, .add_workspace:hover, .btn-danger:hover, .btn-primary:hover, .btn-secondary:hover {
     background-color: white;
     color: black;
 }
@@ -193,7 +193,7 @@ body {
     background: white;
     border-radius: 12px;
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease-out;
 }
@@ -220,7 +220,7 @@ body {
 .modal-header h2 {
     margin: 0;
     font-size: 20px;
-    color: #2c3e50;
+    color: black;
 }
 
 .close-modal {
@@ -242,7 +242,7 @@ body {
 }
 
 .modal-body {
-    padding: 25px;
+    padding: 30px;
 }
 
 .form-group {
@@ -254,14 +254,14 @@ body {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #2c3e50;
+    color: black;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #dddd;
     border-radius: 6px;
     font-size: 16px;
     transition: border-color 0.3s ease;
@@ -288,32 +288,31 @@ body {
 .btn-primary {
     background-color: black;
     color: white;
-    border: none;
+    border: black solid 1px;
     padding: 10px 20px;
     border-radius: 6px;
+    font-size: 16px;
     font-weight: 600;
+    width: 180px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: #616161          ;
 }
 
 .btn-secondary {
-    background-color: #95a5a6; /* Gray - DIFFERENT COLOR */
+    background-color: black; /* Gray - DIFFERENT COLOR */
     color: white;
-    border: none;
+    border: black solid 1px;
     padding: 10px 20px;
     border-radius: 6px;
+    font-size: 16px;
     font-weight: 600;
+    width: 180px;
     cursor: pointer;
-    font-size: 14px;
     transition: background-color 0.3s ease;
 }
 
-.btn-secondary:hover {
-    background-color: #7f8c8d; /* Darker gray */
+.btn-secondary:hover{
+    color: red;
 }
 
 /* Show modal when active */

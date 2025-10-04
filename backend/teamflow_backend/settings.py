@@ -84,6 +84,9 @@ DATABASES = {
     )
 }
 
+SUPABASE_URL = "https://emwyjdkjbrepvqsdzzfx.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd3lqZGtqYnJlcHZxc2R6emZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NzQwODEsImV4cCI6MjA3NDM1MDA4MX0.xqmZxYzIoiA1ZMthFCJnh5NsIB-9AmtxzmIs5mg-sVs"
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'workspaces.authentication.SupabaseJWTAuthentication',
@@ -155,3 +158,16 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Replace with your Gmail
+EMAIL_HOST_USER = "kenpatrick.ranis@gmail.com"
+
+# Use an App Password, NOT your Gmail password
+EMAIL_HOST_PASSWORD = "zujf jhqz rzcx yrcv"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

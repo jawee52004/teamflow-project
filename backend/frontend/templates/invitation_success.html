@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invitation Status</title>
+    <link rel="stylesheet" href="{% static 'invitation_success.css' %}">
+</head>
+<body>
+    <div class="card">
+        {% if error %}
+            <h1 class="error">Invitation Failed</h1>
+            <p>{{ error }}</p>
+        {% else %}
+            <h1 class="success">🎉 Welcome to {{ workspace_name }}!</h1>
+            <p>You've been successfully added as a <strong>{{ role }}</strong>.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
